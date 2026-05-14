@@ -2,7 +2,8 @@ package ru.sfedu.sharding.service.service;
 
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import lombok.RequiredArgsConstructor;
 import ru.sfedu.sharding.service.dto.ShardIndexResponse;
@@ -19,8 +20,8 @@ public class ShardingService {
     private static final int MAX_RETRIES = 3;
 
     private final ShardIndexRepository repository;
+    private final TransactionTemplate transactionTemplate;
 
-    @Transactional
     public ShardIndexResponse createShardIndex(String objectId, Integer shardIndex) {
         if (repository.existsByObjectId(objectId)) {
             throw new ShardIndexAlreadyExistsException(objectId);
@@ -30,15 +31,16 @@ public class ShardingService {
         return ShardIndexResponse.of(entity.getObjectId(), entity.getShardIndex());
     }
 
-    @Transactional
     public ShardIndexResponse updateShardIndex(String objectId, Integer newShardIndex) {
         for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
             try {
-                ShardIndex entity = repository.findByObjectId(objectId)
-                    .orElseThrow(() -> new ShardIndexNotFoundException(objectId));
-                entity.setShardIndex(newShardIndex);
-                entity = repository.save(entity);
-                return ShardIndexResponse.of(entity.getObjectId(), entity.getShardIndex());
+                return transactionTemplate.execute(status -> {
+                    ShardIndex entity = repository.findByObjectId(objectId)
+                        .orElseThrow(() -> new ShardIndexNotFoundException(objectId));
+                    entity.setShardIndex(newShardIndex);
+                    entity = repository.saveAndFlush(entity);
+                    return ShardIndexResponse.of(entity.getObjectId(), entity.getShardIndex());
+                });
             } catch (OptimisticLockingFailureException e) {
                 if (attempt == MAX_RETRIES) {
                     throw new ShardUpdateConflictException(objectId);
@@ -48,7 +50,6 @@ public class ShardingService {
         throw new ShardUpdateConflictException(objectId);
     }
 
-    @Transactional(readOnly = true)
     public ShardIndexResponse getShardIndex(String objectId) {
         ShardIndex entity = repository.findByObjectId(objectId)
             .orElseThrow(() -> new ShardIndexNotFoundException(objectId));
