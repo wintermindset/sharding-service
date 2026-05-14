@@ -32,3 +32,23 @@ spring:
 
 server:
   port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    tags:
+      application: sharding-service
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      slo:
+        http.server.requests: 10ms,50ms,100ms,200ms,500ms
+  endpoint:
+    prometheus:
+      enabled: true
+  observations:
+    key-values:
+      application: sharding-service
