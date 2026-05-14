@@ -1,0 +1,75 @@
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: sharding-postgres
+    environment:
+      POSTGRES_DB: sharding
+      POSTGRES_USER: sharding
+      POSTGRES_PASSWORD: sharding
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sharding -d sharding"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  sharding-service:
+    build:
+      context: ../..
+      dockerfile: Dockerfile.service
+    container_name: sharding-service
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sharding
+      SPRING_DATASOURCE_USERNAME: sharding
+      SPRING_DATASOURCE_PASSWORD: sharding
+      SPRING_FLYWAY_ENABLED: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  load-generator:
+    build:
+      context: ../..
+      dockerfile: Dockerfile.load-generator
+    container_name: sharding-load-generator
+    environment:
+      LOAD_TARGET_URL: http://sharding-service:8080
+      LOAD_DURATION_MINUTES: "15"
+    depends_on:
+      sharding-service:
+        condition: service_started
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: sharding-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      - sharding-service
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: sharding-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Admin"
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+    depends_on:
+      - prometheus
+
+volumes:
+  pgdata:

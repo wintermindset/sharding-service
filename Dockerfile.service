@@ -1,0 +1,18 @@
+FROM eclipse-temurin:21-jre-alpine AS build
+WORKDIR /app
+COPY mvnw pom.xml ./
+COPY .mvn .mvn
+COPY sharding-core/pom.xml sharding-core/
+COPY load-generator/pom.xml load-generator/
+RUN --mount=type=cache,target=/root/.m2 ./mvnw dependency:go-offline -B -q
+
+COPY . .
+RUN --mount=type=cache,target=/root/.m2 ./mvnw package -pl sharding-core -DskipTests -B -q
+
+FROM eclipse-temurin:21-jre-alpine
+RUN addgroup -S app && adduser -S app -G app
+USER app
+WORKDIR /app
+COPY --from=build /app/sharding-core/target/*.jar app.jar
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]
