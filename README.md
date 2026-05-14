@@ -1,10 +1,10 @@
 # Sharding Service
 
-A centralized shard index lookup/mapping service for distributed database sharding architectures. Built with Java 21 and Spring Boot 4.0.6.
+A centralized shard index lookup/mapping service for distributed database sharding architectures. Built with Java 21, Spring Boot 4.0.6 and PostgreSQL.
 
 ## Architecture
 
-This service acts as a **shard directory** — it stores and manages mappings from logical object identifiers (`object_id`) to shard numbers (`shard_index`), telling clients which shard holds a given piece of data.
+This service acts as a **shard directory** — it stores and manages mappings from logical object identifiers (`object_id`) to shard numbers (`shard_index`), telling clients which shard holds a given piece of data. Strings for `object_id` type were chosen because both UUID and Long can be written as strings.
 
 ## Modules
 
@@ -89,7 +89,7 @@ docker build -f Dockerfile.load-generator -t load-generator .
 ## Monitoring
 
 - **Prometheus** metrics: `http_server_requests_seconds`, `hikaricp_connections_*`, JVM metrics
-- **Grafana** dashboards: TPS, P95/P99 latency, CPU, heap, DB connections
+- **Grafana** dashboards: TPS, P95 latency, CPU, heap, DB connections
 - Default endpoints:
   - Service: `http://localhost:8080`
   - Prometheus: `http://localhost:9090`
