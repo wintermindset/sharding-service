@@ -4,3 +4,9 @@ spring:
 
 server:
   port: 8081
+
+load:
+  target:
+    url: ${TARGET_URL:http://localhost:8080}
+  duration:
+    minutes: ${LOAD_DURATION_MINUTES:15}
