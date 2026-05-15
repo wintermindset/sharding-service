@@ -96,6 +96,7 @@ class ShardingServiceTest {
                 () -> service.getShardIndex(objectId));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void updateShardIndex_shouldReturnResponse() {
         String objectId = "obj-0000000001";
@@ -123,6 +124,7 @@ class ShardingServiceTest {
         assertEquals(newIndex, response.shardIndex());
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void updateShardIndex_shouldThrowWhenNotFound() {
         String objectId = "nonexistent";
@@ -137,6 +139,7 @@ class ShardingServiceTest {
                 () -> service.updateShardIndex(objectId, 10));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void updateShardIndex_shouldRetryOnOptimisticLock() {
         String objectId = "obj-0000000001";
@@ -169,6 +172,7 @@ class ShardingServiceTest {
         verify(transactionTemplate, times(2)).execute(any(TransactionCallback.class));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     void updateShardIndex_shouldThrowAfterMaxRetries() {
         String objectId = "obj-0000000001";

@@ -67,13 +67,11 @@ class ShardingServiceConcurrencyTest {
 
         executor.shutdown();
 
-        int successCount = 0;
         int conflictCount = 0;
         int lastKnownValue = 0;
         for (Future<Integer> future : futures) {
             int result = future.get();
             if (result >= 0) {
-                successCount++;
                 lastKnownValue = result;
             } else {
                 conflictCount++;
