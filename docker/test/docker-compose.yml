@@ -29,6 +29,12 @@ services:
       SPRING_DATASOURCE_USERNAME: sharding
       SPRING_DATASOURCE_PASSWORD: sharding
       SPRING_FLYWAY_ENABLED: "true"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     depends_on:
       postgres:
         condition: service_healthy
