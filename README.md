@@ -120,3 +120,7 @@ sharding-service/
 ├── Dockerfile.service
 └── Dockerfile.load-generator
 ```
+
+## Report for SFedU
+
+![report](/docs/report.png)
