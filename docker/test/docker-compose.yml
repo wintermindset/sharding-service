@@ -43,7 +43,7 @@ services:
       LOAD_DURATION_MINUTES: "15"
     depends_on:
       sharding-service:
-        condition: service_started
+        condition: service_healthy
 
   prometheus:
     image: prom/prometheus:latest

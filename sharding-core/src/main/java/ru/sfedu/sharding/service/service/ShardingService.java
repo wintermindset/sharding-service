@@ -38,7 +38,7 @@ public class ShardingService {
                     ShardIndex entity = repository.findByObjectId(objectId)
                         .orElseThrow(() -> new ShardIndexNotFoundException(objectId));
                     entity.setShardIndex(newShardIndex);
-                    entity = repository.saveAndFlush(entity);
+                    entity = repository.save(entity);
                     return ShardIndexResponse.of(entity.getObjectId(), entity.getShardIndex());
                 });
             } catch (OptimisticLockingFailureException e) {
