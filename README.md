@@ -2,8 +2,6 @@
 
 A centralized shard index lookup/mapping service for distributed database sharding architectures. Built with Java 21, Spring Boot 4.0.6 and PostgreSQL.
 
-> Note: The first startup runs a Flyway migration that seeds 5,000,000 sample records into the shard_indices table. This may take a couple of time depending on your machine. Subsequent starts skip this step. The service won't accept requests until the migration completes.
-
 ## Architecture
 
 This service acts as a **shard directory** — it stores and manages mappings from logical object identifiers (`object_id`) to shard numbers (`shard_index`), telling clients which shard holds a given piece of data. Strings for `object_id` type were chosen because both UUID and Long can be written as strings.
@@ -64,6 +62,8 @@ docker compose -f docker/dev/docker-compose.yml up -d
 ```
 
 The service starts on port `8080`. Flyway automatically creates the table and seeds 5M records.
+
+> Note: The first startup may take a couple of time depending on your machine. Subsequent starts skip this step. The service won't accept requests until the migration completes.
 
 ### Run tests
 
