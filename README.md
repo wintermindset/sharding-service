@@ -123,4 +123,5 @@ sharding-service/
 
 ## Report for SFedU
 
-![report](/docs/report.png)
+![report1](/docs/report1.png)
+![report2](/docs/report2.png)
