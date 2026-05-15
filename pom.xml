@@ -37,6 +37,9 @@
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.release>21</maven.compiler.release>
 		<flyway.version>11.3.1</flyway.version>
+		<errorprone.version>2.49.0</errorprone.version>
+		<nullaway.version>0.13.4</nullaway.version>
+		<jspecify.version>1.0.0</jspecify.version>
 	</properties>
 
 	<dependencyManagement>
@@ -50,6 +53,11 @@
 				<groupId>org.flywaydb</groupId>
 				<artifactId>flyway-database-postgresql</artifactId>
 				<version>${flyway.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jspecify</groupId>
+				<artifactId>jspecify</artifactId>
+				<version>${jspecify.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -69,18 +77,36 @@
 						</excludes>
 					</configuration>
 				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<configuration>
-						<annotationProcessorPaths>
-							<path>
-								<groupId>org.projectlombok</groupId>
-								<artifactId>lombok</artifactId>
-							</path>
-						</annotationProcessorPaths>
-					</configuration>
-				</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<fork>true</fork>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</path>
+						<path>
+							<groupId>com.google.errorprone</groupId>
+							<artifactId>error_prone_core</artifactId>
+							<version>${errorprone.version}</version>
+						</path>
+						<path>
+							<groupId>com.uber.nullaway</groupId>
+							<artifactId>nullaway</artifactId>
+							<version>${nullaway.version}</version>
+						</path>
+					</annotationProcessorPaths>
+					<compilerArgs>
+						<arg>-XDcompilePolicy=simple</arg>
+						<arg>-Xplugin:ErrorProne</arg>
+						<arg>-XepDisableAllChecks</arg>
+						<arg>-Xep:NullAway:ERROR</arg>
+						<arg>-XepOpt:NullAway:AnnotatedPackages=ru.sfedu</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
 				<plugin>
 					<groupId>org.flywaydb</groupId>
 					<artifactId>flyway-maven-plugin</artifactId>
