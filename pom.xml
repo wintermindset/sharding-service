@@ -34,7 +34,6 @@
 
 	<properties>
 		<java.version>21</java.version>
-		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.release>21</maven.compiler.release>
 		<flyway.version>11.3.1</flyway.version>
 		<errorprone.version>2.49.0</errorprone.version>
@@ -100,12 +99,33 @@
 					</annotationProcessorPaths>
 					<compilerArgs>
 						<arg>-XDcompilePolicy=simple</arg>
-						<arg>-Xplugin:ErrorProne</arg>
-						<arg>-XepDisableAllChecks</arg>
-						<arg>-Xep:NullAway:ERROR</arg>
-						<arg>-XepOpt:NullAway:AnnotatedPackages=ru.sfedu</arg>
+						<arg>-XDaddTypeAnnotationsToSymbol=true</arg>
+						<arg>--should-stop=ifError=FLOW</arg>
+						<arg>-Xplugin:ErrorProne -XepDisableAllChecks -Xep:NullAway:ERROR -XepOpt:NullAway:AnnotatedPackages=ru.sfedu</arg>
+						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+						<arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+						<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+						<arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
 					</compilerArgs>
 				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>com.google.errorprone</groupId>
+						<artifactId>error_prone_core</artifactId>
+						<version>${errorprone.version}</version>
+					</dependency>
+					<dependency>
+						<groupId>com.uber.nullaway</groupId>
+						<artifactId>nullaway</artifactId>
+						<version>${nullaway.version}</version>
+					</dependency>
+				</dependencies>
 			</plugin>
 				<plugin>
 					<groupId>org.flywaydb</groupId>
