@@ -8,6 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -35,6 +36,9 @@ class ShardingServiceTest {
 
     @Mock
     private TransactionTemplate transactionTemplate;
+
+    @Mock
+    private TransactionStatus transactionStatus;
 
     private ShardingService service;
 
@@ -106,7 +110,7 @@ class ShardingServiceTest {
         entity.setVersion(0L);
 
         when(repository.findByObjectId(objectId)).thenReturn(Optional.of(entity));
-        when(repository.saveAndFlush(any(ShardIndex.class))).thenAnswer(invocation -> {
+        when(repository.save(any(ShardIndex.class))).thenAnswer(invocation -> {
             ShardIndex saved = invocation.getArgument(0);
             saved.setVersion(1L);
             return saved;
@@ -114,7 +118,7 @@ class ShardingServiceTest {
         when(transactionTemplate.execute(any(TransactionCallback.class)))
                 .thenAnswer(invocation -> {
                     TransactionCallback<ShardIndexResponse> callback = invocation.getArgument(0);
-                    return callback.doInTransaction(null);
+                    return callback.doInTransaction(transactionStatus);
                 });
 
         ShardIndexResponse response = service.updateShardIndex(objectId, newIndex);
@@ -132,7 +136,7 @@ class ShardingServiceTest {
         when(transactionTemplate.execute(any(TransactionCallback.class)))
                 .thenAnswer(invocation -> {
                     TransactionCallback<ShardIndexResponse> callback = invocation.getArgument(0);
-                    return callback.doInTransaction(null);
+                    return callback.doInTransaction(transactionStatus);
                 });
 
         assertThrows(ShardIndexNotFoundException.class,
@@ -147,7 +151,7 @@ class ShardingServiceTest {
         entity.setVersion(0L);
 
         when(repository.findByObjectId(objectId)).thenReturn(Optional.of(entity));
-        when(repository.saveAndFlush(any(ShardIndex.class)))
+        when(repository.save(any(ShardIndex.class)))
                 .thenThrow(new OptimisticLockingFailureException("conflict"))
                 .thenAnswer(invocation -> {
                     ShardIndex saved = invocation.getArgument(0);
@@ -157,18 +161,18 @@ class ShardingServiceTest {
         when(transactionTemplate.execute(any(TransactionCallback.class)))
                 .thenAnswer(invocation -> {
                     TransactionCallback<ShardIndexResponse> callback = invocation.getArgument(0);
-                    return callback.doInTransaction(null);
+                    return callback.doInTransaction(transactionStatus);
                 })
                 .thenAnswer(invocation -> {
                     TransactionCallback<ShardIndexResponse> callback = invocation.getArgument(0);
-                    return callback.doInTransaction(null);
+                    return callback.doInTransaction(transactionStatus);
                 });
 
         ShardIndexResponse response = service.updateShardIndex(objectId, 10);
 
         assertNotNull(response);
         assertEquals(10, response.shardIndex());
-        verify(repository, times(2)).saveAndFlush(any(ShardIndex.class));
+        verify(repository, times(2)).save(any(ShardIndex.class));
         verify(transactionTemplate, times(2)).execute(any(TransactionCallback.class));
     }
 
@@ -180,17 +184,17 @@ class ShardingServiceTest {
         entity.setVersion(0L);
 
         when(repository.findByObjectId(objectId)).thenReturn(Optional.of(entity));
-        when(repository.saveAndFlush(any(ShardIndex.class)))
+        when(repository.save(any(ShardIndex.class)))
                 .thenThrow(new OptimisticLockingFailureException("conflict"));
         when(transactionTemplate.execute(any(TransactionCallback.class)))
                 .thenAnswer(invocation -> {
                     TransactionCallback<ShardIndexResponse> callback = invocation.getArgument(0);
-                    return callback.doInTransaction(null);
+                    return callback.doInTransaction(transactionStatus);
                 });
 
         assertThrows(ShardUpdateConflictException.class,
                 () -> service.updateShardIndex(objectId, 10));
-        verify(repository, times(3)).saveAndFlush(any(ShardIndex.class));
+        verify(repository, times(3)).save(any(ShardIndex.class));
         verify(transactionTemplate, times(3)).execute(any(TransactionCallback.class));
     }
 }
