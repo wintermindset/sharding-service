@@ -1,6 +1,6 @@
 # Sharding Service
 
-A centralized shard index lookup/mapping service for distributed database sharding architectures. Built with Java 21, Spring Boot 4.0.6 and PostgreSQL.
+REST API service for shard-to-object mapping for distributed database sharding architectures. Built with Java 21, Spring Boot 4.0.6 and PostgreSQL.
 
 ## Architecture
 
