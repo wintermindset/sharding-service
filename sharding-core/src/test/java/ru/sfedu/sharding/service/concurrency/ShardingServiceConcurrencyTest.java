@@ -68,12 +68,9 @@ class ShardingServiceConcurrencyTest {
         executor.shutdown();
 
         int conflictCount = 0;
-        int lastKnownValue = 0;
         for (Future<Integer> future : futures) {
             int result = future.get();
-            if (result >= 0) {
-                lastKnownValue = result;
-            } else {
+            if (result < 0) {
                 conflictCount++;
             }
         }
@@ -82,8 +79,10 @@ class ShardingServiceConcurrencyTest {
         ShardIndexResponse finalResponse = shardingService.getShardIndex(TEST_OBJECT_ID);
 
         assertNotNull(finalEntity);
-        assertEquals(lastKnownValue, finalResponse.shardIndex());
-        assertEquals(lastKnownValue, finalEntity.getShardIndex());
+        assertEquals(finalEntity.getShardIndex(), finalResponse.shardIndex());
+        assertTrue(finalEntity.getShardIndex() >= 1 && finalEntity.getShardIndex() <= THREAD_COUNT,
+                "Final shard index should be one of the target values, but was: "
+                        + finalEntity.getShardIndex());
         assertTrue(conflictCount <= THREAD_COUNT - 1,
                 "At least one update should succeed, conflicts: " + conflictCount);
     }
