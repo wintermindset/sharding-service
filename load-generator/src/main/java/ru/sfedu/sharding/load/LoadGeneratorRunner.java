@@ -7,6 +7,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -158,13 +159,13 @@ public class LoadGeneratorRunner implements CommandLineRunner {
             if (statusCode >= 400) {
                 errorRequests.incrementAndGet();
             }
-            latencies.computeIfAbsent(type, k -> new ArrayList<>()).add(elapsedNanos);
+            latencies.computeIfAbsent(type, k -> Collections.synchronizedList(new ArrayList<>())).add(elapsedNanos);
         }
 
         void recordError(String type, long elapsedNanos) {
             totalRequests.incrementAndGet();
             errorRequests.incrementAndGet();
-            latencies.computeIfAbsent(type, k -> new ArrayList<>()).add(elapsedNanos);
+            latencies.computeIfAbsent(type, k -> Collections.synchronizedList(new ArrayList<>())).add(elapsedNanos);
         }
 
         void printInterval() {
