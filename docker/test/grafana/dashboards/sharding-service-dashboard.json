@@ -100,6 +100,6 @@
       }
     }
   ],
-  "refresh": "15s",
+  "refresh": "5s",
   "time": { "from": "now-5m", "to": "now" }
 }
