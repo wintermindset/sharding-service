@@ -1,6 +1,6 @@
 # Sharding Service
 
-REST API service for shard-to-object mapping for distributed database sharding architectures. Built with Java 21, Spring Boot 4.0.6 and PostgreSQL.
+REST API service for shard-to-object mapping for distributed database sharding architectures. Built with Java 21, Spring Boot 4.0.6 and PostgreSQL. The project uses JSpecify and NullAway to enforce strict null-safety at compile time.
 
 ## Architecture
 
