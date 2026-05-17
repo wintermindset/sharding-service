@@ -54,11 +54,11 @@ A Flyway migration seeds 5,000,000 sample records on first startup.
 ### Run
 
 ```bash
-# Start PostgreSQL, Prometheus, Grafana
-docker compose -f docker/dev/docker-compose.yml up -d
+# Start service and dependencies in containers
+docker compose -f docker/dev/docker-compose.yml up
 
-# Build and run the service
-./mvnw spring-boot:run -pl sharding-core
+# or start infrastructure only (DB + monitoring) and build the service
+docker compose -f docker/infra/docker-compose.yml up -d && ./mvnw spring-boot:run -pl sharding-core
 ```
 
 The service starts on port `8080`. Flyway automatically creates the table and seeds 5M records.
@@ -74,14 +74,17 @@ The service starts on port `8080`. Flyway automatically creates the table and se
 ### Run load generator
 
 ```bash
-# Start the full test environment (service + DB + monitoring)
-docker compose -f docker/test/docker-compose.yml up -d
-
-# Or run the load generator directly
+# Start load generator if infrastructure and service are on
 ./mvnw spring-boot:run -pl load-generator
+
+# or start service and dependencies with load generator in containers
+docker compose -f docker/test/docker-compose.yml up
 ```
 
 ### Docker build
+
+BuildKit cache mounts speed up Maven dependency resolution on rebuilds.
+A `.dockerignore` keeps the build context lean by excluding `target/`, `.git/`, and other unnecessary files.
 
 ```bash
 docker build -f Dockerfile.service -t sharding-service .
@@ -117,8 +120,10 @@ sharding-service/
 │       └── application.yaml
 ├── load-generator/          # Load testing module
 ├── docker/
-│   ├── dev/                 # Dev environment (PostgreSQL + Prometheus + Grafana)
-│   └── test/                # Test environment (full stack)
+│   ├── dev/                 # Dev environment + Service
+│   ├── infra/               # Dev environment (PostgreSQL + Prometheus + Grafana)
+│   └── test/                # Test environment (full stack + load generator)
+├── .dockerignore
 ├── Dockerfile.service
 └── Dockerfile.load-generator
 ```
