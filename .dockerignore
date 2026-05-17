@@ -1,0 +1,11 @@
+target/
+.git
+.gitattributes
+.gitignore
+.github/
+.gitmessage
+.vscode/
+.DS_Store
+*.md
+LICENSE
+docker/
