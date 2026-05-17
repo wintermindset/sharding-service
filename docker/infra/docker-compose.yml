@@ -17,28 +17,6 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  sharding-service:
-    build:
-      context: ../..
-      dockerfile: Dockerfile.service
-    container_name: sharding-service
-    ports:
-      - "8080:8080"
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/sharding
-      SPRING_DATASOURCE_USERNAME: sharding
-      SPRING_DATASOURCE_PASSWORD: sharding
-      SPRING_FLYWAY_ENABLED: "true"
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    depends_on:
-      postgres:
-        condition: service_healthy
-
   prometheus:
     image: prom/prometheus:latest
     container_name: sharding-prometheus
@@ -47,7 +25,7 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     depends_on:
-      - sharding-service
+      - postgres
 
   grafana:
     image: grafana/grafana:latest

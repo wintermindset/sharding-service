@@ -1,0 +1,105 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "title": "Sharding Service",
+  "uid": "sharding-service",
+  "version": 1,
+  "timezone": "browser",
+  "editable": true,
+  "panels": [
+    {
+      "title": "TPS by Endpoint",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{application=\"sharding-service\"}[1m])) by (uri, outcome)",
+          "legendFormat": "{{uri}} ({{outcome}})"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "reqps",
+          "min": 0
+        }
+      }
+    },
+    {
+      "title": "P95 Latency",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{application=\"sharding-service\"}[1m])) by (le, uri))",
+          "legendFormat": "{{uri}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "min": 0
+        }
+      }
+    },
+    {
+      "title": "CPU Usage",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "system_cpu_usage{application=\"sharding-service\"}",
+          "legendFormat": "CPU"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        }
+      }
+    },
+    {
+      "title": "Heap Memory",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{application=\"sharding-service\", area=\"heap\"}",
+          "legendFormat": "{{id}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        }
+      }
+    },
+    {
+      "title": "DB Active Connections",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        {
+          "expr": "hikaricp_connections_active{application=\"sharding-service\"}",
+          "legendFormat": "Active"
+        },
+        {
+          "expr": "hikaricp_connections_idle{application=\"sharding-service\"}",
+          "legendFormat": "Idle"
+        },
+        {
+          "expr": "hikaricp_connections_pending{application=\"sharding-service\"}",
+          "legendFormat": "Pending"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0
+        }
+      }
+    }
+  ],
+  "refresh": "5s",
+  "time": { "from": "now-5m", "to": "now" }
+}
