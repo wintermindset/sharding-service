@@ -205,16 +205,13 @@ public class LoadGeneratorRunner implements CommandLineRunner {
                 double avg = typeLatencies.stream().mapToLong(Long::longValue).average().orElse(0);
                 long p50 = typeLatencies.get((int) (count * 0.50));
                 long p95 = typeLatencies.get((int) (count * 0.95));
-                long p99 = typeLatencies.get((int) (count * 0.99));
-
-                log.info("[{}] count={}, min={}ms, avg={}ms, max={}ms, p50={}ms, p95={}ms, p99={}ms",
+                log.info("[{}] count={}, min={}ms, avg={}ms, max={}ms, p50={}ms, p95={}ms",
                         type, count,
                         String.format("%.1f", min / 1_000_000.0),
                         String.format("%.1f", avg / 1_000_000.0),
                         String.format("%.1f", max / 1_000_000.0),
                         String.format("%.1f", p50 / 1_000_000.0),
-                        String.format("%.1f", p95 / 1_000_000.0),
-                        String.format("%.1f", p99 / 1_000_000.0));
+                        String.format("%.1f", p95 / 1_000_000.0));
             }
         }
     }
