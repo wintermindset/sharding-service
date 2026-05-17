@@ -11,8 +11,8 @@ RUN --mount=type=cache,target=/root/.m2 ./mvnw package -pl sharding-core -DskipT
 
 FROM eclipse-temurin:21-jre-alpine
 RUN addgroup -S app && adduser -S app -G app && \
-    mkdir -p /var/log/sharding-service && \
-    chown -R app:app /var/log/sharding-service
+    mkdir -p /app/logs/sharding-service && \
+    chown -R app:app /app/logs/sharding-service
 USER app
 WORKDIR /app
 COPY --from=build /app/sharding-core/target/*.jar app.jar
