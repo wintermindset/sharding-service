@@ -20,7 +20,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Component
+@Slf4j
 public class LoadGeneratorRunner implements CommandLineRunner {
 
     private static final int OBJECT_POOL_SIZE = 5_000_000;
@@ -44,11 +47,10 @@ public class LoadGeneratorRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        System.out.println("=== Load Generator Starting ===");
-        System.out.println("Target: " + targetUrl);
-        System.out.println("Duration: " + durationMinutes + " minutes");
-        System.out.println("Creates: 1 TPS | Updates: 5 TPS | Reads: 10 TPS");
-        System.out.println();
+        log.info("=== Load Generator Starting ===");
+        log.info("Target: {}", targetUrl);
+        log.info("Duration: {} minutes", durationMinutes);
+        log.info("Creates: 1 TPS | Updates: 5 TPS | Reads: 10 TPS");
 
         ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
@@ -74,7 +76,7 @@ public class LoadGeneratorRunner implements CommandLineRunner {
         }
 
         stats.printSummary(durationMinutes);
-        System.out.println("=== Load Generator Finished ===");
+        log.info("=== Load Generator Finished ===");
     }
 
     private void executeCreate() {
@@ -176,25 +178,24 @@ public class LoadGeneratorRunner implements CommandLineRunner {
             long elapsedSec = Duration.between(lastIntervalTime, now).getSeconds();
             lastIntervalTime = now;
             double tps = elapsedSec > 0 ? (double) intervalTotal / elapsedSec : 0;
-            System.out.printf("[%s] TPS: %.1f | Total: %d | Errors: %d%n",
+            log.info("[{}] TPS: {} | Total: {} | Errors: {}",
                     java.time.LocalTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")),
-                    tps, currentTotal, errorRequests.get());
+                    String.format("%.1f", tps), currentTotal, errorRequests.get());
         }
 
         void printSummary(long durationMinutes) {
-            System.out.println();
-            System.out.println("=== Load Test Summary ===");
-            System.out.printf("Duration: %d minutes%n", durationMinutes);
-            System.out.printf("Total requests: %d%n", totalRequests.get());
-            System.out.printf("Total errors: %d (%.1f%%)%n",
-                    errorRequests.get(),
-                    totalRequests.get() > 0 ? 100.0 * errorRequests.get() / totalRequests.get() : 0);
-            System.out.println();
+            log.info("=== Load Test Summary ===");
+            log.info("Duration: {} minutes", durationMinutes);
+            log.info("Total requests: {}", totalRequests.get());
+            double errorRate = totalRequests.get() > 0
+                    ? 100.0 * errorRequests.get() / totalRequests.get() : 0;
+            log.info("Total errors: {} ({})",
+                    errorRequests.get(), String.format("%.1f%%", errorRate));
 
             for (String type : List.of("create", "update", "read")) {
                 List<Long> typeLatencies = latencies.get(type);
                 if (typeLatencies == null || typeLatencies.isEmpty()) {
-                    System.out.printf("[%s] No requests%n", type);
+                    log.info("[{}] No requests", type);
                     continue;
                 }
                 typeLatencies.sort(Comparator.naturalOrder());
@@ -206,10 +207,14 @@ public class LoadGeneratorRunner implements CommandLineRunner {
                 long p95 = typeLatencies.get((int) (count * 0.95));
                 long p99 = typeLatencies.get((int) (count * 0.99));
 
-                System.out.printf("[%s] count=%d, min=%.1fms, avg=%.1fms, max=%.1fms, p50=%.1fms, p95=%.1fms, p99=%.1fms%n",
+                log.info("[{}] count={}, min={}ms, avg={}ms, max={}ms, p50={}ms, p95={}ms, p99={}ms",
                         type, count,
-                        min / 1_000_000.0, avg / 1_000_000.0, max / 1_000_000.0,
-                        p50 / 1_000_000.0, p95 / 1_000_000.0, p99 / 1_000_000.0);
+                        String.format("%.1f", min / 1_000_000.0),
+                        String.format("%.1f", avg / 1_000_000.0),
+                        String.format("%.1f", max / 1_000_000.0),
+                        String.format("%.1f", p50 / 1_000_000.0),
+                        String.format("%.1f", p95 / 1_000_000.0),
+                        String.format("%.1f", p99 / 1_000_000.0));
             }
         }
     }

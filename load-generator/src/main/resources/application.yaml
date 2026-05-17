@@ -10,3 +10,7 @@ load:
     url: ${TARGET_URL:http://localhost:8080}
   duration:
     minutes: ${LOAD_DURATION_MINUTES:15}
+
+logging:
+  level:
+    ru.sfedu.sharding.load: INFO

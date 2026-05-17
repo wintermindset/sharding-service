@@ -10,7 +10,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import lombok.extern.slf4j.Slf4j;
+
 @Configuration
+@Slf4j
 public class FlywayConfig implements BeanFactoryPostProcessor {
 
     @Override
@@ -19,6 +22,7 @@ public class FlywayConfig implements BeanFactoryPostProcessor {
                 && beanFactory.containsBeanDefinition("flyway")) {
             var bd = beanFactory.getBeanDefinition("entityManagerFactory");
             bd.setDependsOn("flyway");
+            log.debug("Ordered Flyway before JPA entity manager factory");
         }
     }
 
