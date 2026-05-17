@@ -32,8 +32,10 @@ public class ShardIndexController {
     }
 
     @PutMapping("/{objectId}")
-    public ShardIndexResponse update(@PathVariable String objectId,
-                                     @Valid @RequestBody UpdateShardIndexRequest request) {
+    public ShardIndexResponse update(
+            @PathVariable String objectId,
+            @Valid @RequestBody UpdateShardIndexRequest request
+    ) {
         return shardingService.updateShardIndex(objectId, request.shardIndex());
     }
 
