@@ -37,3 +37,6 @@ build/
 
 ### Java version ###
 .java-version
+
+sharding-core/logs/
+logs/
